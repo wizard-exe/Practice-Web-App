@@ -1,0 +1,59 @@
+import { useState, useEffect } from "react";
+import Country from "./components/Country";
+import countriesService from "./services/countries";
+
+const App = () => {
+  const [countries, setCountries] = useState([]);
+  const [filter, setFilter] = useState("");
+  const [weather, setWeather] = useState([]);
+
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
+  };
+
+  const countriesToShow = countries.filter((country) =>
+    country.name.common.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  useEffect(() => {
+    countriesService.getInfo().then((coun) => {
+      setCountries(coun)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (countriesToShow.length === 1) {
+      const country = countriesToShow[0];
+      countriesService.getWeather(country.latlng[0], country.latlng[1]).then((wea) => {
+        setWeather(wea);
+      });
+    } else {
+      setWeather(null);
+    }
+  }, [countriesToShow]);
+
+  return (
+    <div>
+      <h1>Countries</h1>
+      <div>
+        Find countries: <input value={filter} onChange={handleFilterChange} />
+      </div>
+      <div>
+        {countriesToShow.length > 10 ? (
+          <p>Too many matches, specify another filter</p>
+        ) : countriesToShow.length === 1 ? (
+            <Country key={countriesToShow[0].name.common} country={countriesToShow[0]} weather={weather} />
+        ) : (
+          countriesToShow.map((country) => (
+            <div key={country.name.common}>
+              {country.name.common}
+              <button onClick={() => setFilter(country.name.common)}>show</button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
