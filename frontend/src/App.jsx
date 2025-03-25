@@ -71,8 +71,9 @@ const App = () => {
       .catch(error => {
         setErrorMessage(`Failed to update '${newPerson}'`);
         setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);
+          setErrorMessage(null)
+        }, 5000)
+        console.log(error.response.data.error)
       })
     }
   }
