@@ -12,8 +12,10 @@ const create = (newObject) => {
 }
 
 const update = (id, newObject) => {
-  const request = axios.put(`${baseUrl}/${id}`, newObject).catch(() => {console.log('fail')})
-  return request.then((response) => response.data)
+  return axios.put(`${baseUrl}/${id}`, newObject, {
+    headers: { 'Content-Type': 'application/json' },
+    params: { runValidators: true }
+  }).then(response => response.data)
 }
 
 const deleteP = (id) => {
