@@ -1,5 +1,6 @@
+require('dotenv').config()
 const express = require('express')
-const { default: Person } = require('../frontend/src/components/Person')
+const Person = require('./models/person')
 const app = express()
 
 app.use(express.static('dist'))
