@@ -69,7 +69,6 @@ const App = () => {
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
-        console.log(error.response.data.error)
       })
     }
   }
