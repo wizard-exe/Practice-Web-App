@@ -1,96 +1,115 @@
 import { useState, useEffect } from 'react'
-import Note from './components/Note'
-import Notification from './components/NotificationE'
-import noteService from './services/notes'
-
-const Footer = () => {
-  const footerStyle = {
-    color: 'green',
-    fontStyle: 'italic',
-    fontSize: 16
-  }
-  return (
-    <div style={footerStyle}>
-      <br />
-      <em>Note app, Department of Computer Science, University of Helsinki 2025</em>
-    </div>
-  )
-}
+import Person from './components/Person'
+import personService from './services/persons'
+import NotificationS from './components/NotificationS'
+import NotificationE from './components/NotificationE'
 
 const App = () => {
-  const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
-  const [showAll, setShowAll] = useState(true)
+  const [persons, setPersons] = useState([])
+  const [newPerson, setNewPerson] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [newFilter, setNewFilter] = useState('')
   const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
 
   useEffect(() => {
-    noteService.getAll().then((initialNotes) => {
-      setNotes(initialNotes)
+    personService.getAll().then((initialPersons) => {
+      setPersons(initialPersons)
     })
   }, [])
 
-  const addNote = (event) => {
+  const randomEightDigitNumber = () => {
+    return Math.floor(10000000 + Math.random() * 90000000);
+  }
+  
+  const handlePersonChange = (event) => {
+    setNewPerson(event.target.value)
+  }
+
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value)
+  }
+
+  const addPerson = (event) => {
     event.preventDefault()
-    const noteObject = {
-      content: newNote,
-      important: Math.random() > 0.5,
+    const personObject = {
+      name: newPerson,
+      number: newNumber
     }
 
-    noteService.create(noteObject).then((returnedNote) => {
-      setNotes(notes.concat(returnedNote))
-      setNewNote('')
-    })
-  }
-
-  const toggleImportanceOf = (id) => {
-    const note = notes.find((n) => n.id === id)
-    const changedNote = { ...note, important: !note.important }
-
-    noteService
-      .update(id, changedNote)
-      .then((returnedNote) => {
-        setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)))
+    if (persons.some((person) => person.name === newPerson)) {
+      window.alert(`${newPerson} is already added to phonebook`)
+      personService.update(persons.find((person) => person.name === newPerson).id, personObject).then((returnedPerson) => {
+          setPersons(persons.map((person) => person.id !== returnedPerson.id ? person : returnedPerson))
+          setNewPerson('')
+          setNewNumber('')
+          setSuccessMessage(
+            `Updated '${returnedPerson.name}'`
+          )
+          setTimeout(() => {
+            setSuccessMessage(null)
+          }, 5000)
+        })
+      .catch(error => {
+        setErrorMessage(`Failed to update '${newPerson}'`);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
       })
-      .catch((error) => {
-        setErrorMessage(
-          `Note '${note.content}' was already removed from server`
+    } else {
+      personService.create(personObject).then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson))
+        setNewPerson('')
+        setNewNumber('')
+        setSuccessMessage(
+          `Added '${returnedPerson.name}'`
         )
         setTimeout(() => {
-          setErrorMessage(null)
+          setSuccessMessage(null)
         }, 5000)
-        setNotes(notes.filter((n) => n.id !== id))
       })
+      .catch(error => {
+        setErrorMessage(`Failed to update '${newPerson}'`);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+      })
+    }
   }
 
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value)
+  const handleFilterChange = (event) => {
+    setNewFilter(event.target.value)
   }
 
-  const notesToShow = showAll ? notes : notes.filter((note) => note.important)
+  const deletePerson = (id) => {
+    const person = persons.find((person) => person.id === id)
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      personService.deleteP(id).then(() => {
+        setPersons(persons.filter((person) => person.id !== id))
+      })
+    }
+  }
 
   return (
     <div>
-      <h1>Notes</h1>
-      <Notification message={errorMessage} />
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
-      </div>
-      <ul>
-        {notesToShow.map((note) => (
-          <Note
-            key={note.id}
-            note={note}
-            toggleImportance={() => toggleImportanceOf(note.id)}
-          />
-        ))}
-      </ul>
-      <form onSubmit={addNote}>
-        <input value={newNote} onChange={handleNoteChange} />
-        <button type="submit">save</button>
+      <h1>Phonebook</h1>
+      <NotificationS message={successMessage} />
+      <NotificationE message={errorMessage} />
+      filter shown with <input value={newFilter} onChange={handleFilterChange} />
+      <h2>Add a new</h2>
+      <form onSubmit={addPerson}>
+        <ul>
+          <p>name: <input value={newPerson} onChange={handlePersonChange} /></p>
+          <p>number <input value={newNumber} onChange={handleNumberChange} /></p>
+          <p><button type="submit">save</button></p>
+        </ul>
       </form>
-      <Footer />
+      <h2>Numbers</h2>
+      <ul>
+        {persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase())).map((person) =>
+          <Person key={person.id} person={person} deleteP={deletePerson}/>
+        )}
+      </ul>
     </div>
   )
 }
