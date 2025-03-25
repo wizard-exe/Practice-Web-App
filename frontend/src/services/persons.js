@@ -7,18 +7,18 @@ const getAll = () => {
 }
 
 const create = (newObject) => {
-  const request = axios.post(baseUrl, newObject).catch(error => {console.log('fail')})
+  const request = axios.post(baseUrl, newObject).catch(() => {console.log('fail')})
   return request.then((response) => response.data)
 }
 
 const update = (id, newObject) => {
-  const request = axios.put(`${baseUrl}/${id}`, newObject).catch(error => {console.log('fail')})
+  const request = axios.put(`${baseUrl}/${id}`, newObject).catch(() => {console.log('fail')})
   return request.then((response) => response.data)
 }
 
 const deleteP = (id) => {
   console.log(id)
-  const request = axios.delete(`${baseUrl}/${id}`).catch(error => {console.log('fail')})
+  const request = axios.delete(`${baseUrl}/${id}`).catch(() => {console.log('fail')})
   return request.then((response) => response.data)
 }
 

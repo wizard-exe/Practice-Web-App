@@ -17,10 +17,6 @@ const App = () => {
       setPersons(initialPersons)
     })
   }, [])
-
-  const randomEightDigitNumber = () => {
-    return Math.floor(10000000 + Math.random() * 90000000);
-  }
   
   const handlePersonChange = (event) => {
     setNewPerson(event.target.value)
@@ -51,7 +47,7 @@ const App = () => {
           }, 5000)
         })
       .catch(error => {
-        setErrorMessage(`Failed to update '${newPerson}'`);
+        setErrorMessage(error.response.data.error);
         setTimeout(() => {
           setErrorMessage(null);
         }, 5000);
