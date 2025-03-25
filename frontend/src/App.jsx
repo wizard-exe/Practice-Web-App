@@ -46,12 +46,18 @@ const App = () => {
             setSuccessMessage(null)
           }, 5000)
         })
-      .catch(error => {
-        setErrorMessage(error.response.data.error);
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);
-      })
+        .catch(error => {
+          const message = error.response?.data?.error
+            || error.message
+            || 'Failed to update person';
+        
+          setErrorMessage(message);
+        
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+        });
+        
     } else {
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson))
@@ -65,11 +71,17 @@ const App = () => {
         }, 5000)
       })
       .catch(error => {
-        setErrorMessage(error.response.data.error);
+        const message = error.response?.data?.error
+          || error.message
+          || 'Failed to create new person';
+      
+        setErrorMessage(message);
+      
         setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
+          setErrorMessage(null);
+        }, 5000);
+      });
+      
     }
   }
 
