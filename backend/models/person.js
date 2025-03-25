@@ -41,4 +41,6 @@ personSchema.set('toJSON', {
   }
 })
 
+mongoose.set('runValidators', true)
+
 module.exports = mongoose.model('Person', personSchema)
